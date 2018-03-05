@@ -180,7 +180,7 @@ PROCEDURE DIVISION.
 
 
         PERFORM WITH TEST AFTER UNTIL choix = 0
-        PERFORM WITH TEST AFTER UNTIL choix < 8
+        PERFORM WITH TEST AFTER UNTIL choix < 20
         DISPLAY ' '
         DISPLAY '  ---------------------------------------  '
         DISPLAY '        MENU VISITEUR         '
@@ -189,14 +189,18 @@ PROCEDURE DIVISION.
         DISPLAY '  ---------------------------------------  '
         DISPLAY ' Quitter le programme : 0                  '
         DISPLAY '  ---------------------------------------  '
+        DISPLAY '       ASTRONAUTE                '
         DISPLAY ' Ajouter un astronaute : 1                '
         DISPLAY ' recherche astronaute  :  2  '
         DISPLAY ' modifier astronaute   :   3  '
         DISPLAY ' supprimer astronaute   :   4  '
         DISPLAY '  ---------------------------------------  '
-        DISPLAY ' Ajouter un athl??te : 3                    '
-        DISPLAY ' Rechercher un athl??te (nom) : 4           '
-        DISPLAY ' Rechercher des athl??tes (pays) : 5        '
+        DISPLAY '       EQUIPE                 '
+        DISPLAY ' Ajouter une equipe                  5'
+        DISPLAY ' Supprimer equipe :                  6'
+        DISPLAY ' Modifier equipe :                   7'
+        DISPLAY ' Afficher les membres d une equipe : 8'
+        DISPLAY ' Recherche equipe                  : 9'
         DISPLAY '  ---------------------------------------  '
         DISPLAY ' Ajouter une course : 6                    '
         DISPLAY ' Rechercher une course (ville + type) : 7  '
@@ -207,6 +211,13 @@ PROCEDURE DIVISION.
         WHEN 2 PERFORM RECHERCHE_ASTRONAUTE
         WHEN 3 PERFORM MODIFIER_ASTRONAUTE
         WHEN 4 PERFORM SUPPRIMER_ASTRONAUTE
+
+        WHEN 5 PERFORM AJOUTER_EQUIPE
+        WHEN 6 PERFORM SUPPRIMER_EQUIPE
+        WHEN 7 PERFORM MODIFIER_EQUIPE
+        WHEN 8 PERFORM AFFICHER_MEMBRE_EQUIPE
+        WHEN 9 PERFORM RECHERCHE_EQUIPE
+
 
 
         END-EVALUATE
@@ -221,6 +232,7 @@ MAIN-PROCEDURE.
 
 
 
+*>*******************ASTRONAUTE*********************************************
 
 AJOUTER_ASTRONAUTE.
 
@@ -455,6 +467,238 @@ SUPPRIMER_ASTRONAUTE.
 
     CLOSE Fastronautes.
 
+
+
+*>*******************EQUIPE*********************************************
+
+AJOUTER_EQUIPE.
+
+    MOVE 0 TO Wtrouve
+
+    OPEN I-O Fequipes
+    OPEN INPUT Fmissions
+
+    DISPLAY "identifiant equipe"
+    ACCEPT feq_idEquipe
+
+    READ Fequipes KEY IS feq_idEquipe
+        INVALID KEY
+           DISPLAY "le nombre d'astronaute"
+           PERFORM WITH TEST AFTER UNTIL feq_nbAstronautes > 0
+                ACCEPT feq_nbAstronautes
+           END-PERFORM
+
+           DISPLAY "description de l'equipe"
+           ACCEPT feq_description
+
+           DISPLAY "identifiant de la mission"
+           ACCEPT  feq_idMission
+
+           PERFORM VERIF_MISSION
+           IF Wtrouve = 1 THEN
+               WRITE equipTampon
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            DISPLAY "ajout reussi"
+                    END-WRITE
+
+           ELSE IF Wtrouve = 0 THEN
+               DISPLAY " "
+           END-IF
+
+
+        NOT INVALID KEY
+            DISPLAY "equipe existe deja"
+
+    END-READ
+
+    CLOSE Fmissions
+    CLOSE Fequipes.
+
+
+SUPPRIMER_EQUIPE.
+
+    OPEN I-O Fequipes
+
+    DISPLAY "donnez l'identifint de l'équipe"
+    ACCEPT feq_idEquipe
+
+    READ Fequipes KEY IS feq_idEquipe
+        INVALID KEY
+            DISPLAY "equipe existe pas"
+        NOT INVALID KEY
+            DISPLAY "supression de l'équipe"
+            DELETE Fequipes RECORD
+    END-READ
+    CLOSE Fequipes.
+
+
+MODIFIER_EQUIPE.
+
+    MOVE 0 TO Wtrouve
+
+    OPEN I-O Fequipes
+    OPEN INPUT Fmissions
+
+    DISPLAY "identifiant equipe"
+    ACCEPT feq_idEquipe
+
+    READ Fequipes KEY IS feq_idEquipe
+        INVALID KEY
+           DISPLAY "le nombre d'astronaute"
+           PERFORM WITH TEST AFTER UNTIL feq_nbAstronautes > 0
+                ACCEPT feq_nbAstronautes
+           END-PERFORM
+
+           DISPLAY "description de l'equipe"
+           ACCEPT feq_description
+
+           DISPLAY "identifiant de la mission"
+           ACCEPT  feq_idMission
+
+           PERFORM VERIF_MISSION
+           IF Wtrouve = 1 THEN
+               REWRITE equipTampon
+
+           ELSE IF Wtrouve = 0 THEN
+               DISPLAY " "
+           END-IF
+
+        NOT INVALID KEY
+            DISPLAY "equipe existe deja"
+
+    END-READ
+
+    CLOSE Fmissions
+    CLOSE Fequipes.
+
+
+
+AFFICHER_MEMBRE_EQUIPE.
+
+     MOVE 0 TO Wfin
+     OPEN INPUT Fequipes
+     OPEN INPUT Fcompo_equipes
+     OPEN INPUT Fastronautes
+
+     PERFORM WITH TEST AFTER UNTIL feq_idEquipe > 0
+        DISPLAY "identifiant equipe"
+        ACCEPT feq_idEquipe
+     END-PERFORM
+
+     READ Fequipes KEY IS feq_idEquipe
+        INVALID KEY
+            DISPLAY "equipe existe pas"
+        NOT INVALID KEY
+            MOVE feq_idEquipe TO Wequipe
+            MOVE Wequipe TO fce_idEquipe
+            START Fcompo_equipes, KEY IS = fce_idEquipe
+                INVALID KEY
+                    DISPLAY "erreur"
+                NOT INVALID KEY
+                    PERFORM WITH TEST AFTER UNTIL Wfin = 1
+                        IF fce_idEquipe = Wequipe THEN
+                            READ Fcompo_equipes NEXT
+                                AT END
+                                    MOVE 1 TO Wfin
+                                NOT AT END
+                                    MOVE fce_idAstronaute TO fast_idAstronaute
+                                    READ Fastronautes KEY IS fast_idAstronaute
+                                        INVALID KEY
+                                            DISPLAY "erreur"
+                                        NOT INVALID KEY
+                                            DISPLAY "identifiant " fast_idAstronaute
+                                            DISPLAY "nom :" fast_nom
+                                            DISPLAY "prenom :" fast_prenom
+                                            DISPLAY "role :" fast_role
+                                            DISPLAY "pays :" fast_pays
+                                    END-READ
+                            END-READ
+                    END-PERFORM
+            END-START
+     END-READ
+
+
+     CLOSE Fastronautes
+     CLOSE Fcompo_equipes
+     CLOSE Fequipes.
+
+RECHERCHE_EQUIPE.
+     PERFORM WITH TEST AFTER UNTIL choix < 4
+            DISPLAY '  ---------------------------------------  '
+            DISPLAY ' recherche vaisseau : 1          '
+            DISPLAY ' recherche lieu     : 2 '
+            DISPLAY ' recherche mission  : 3'
+            DISPLAY ' recherche voisin : 4'
+            DISPLAY '  ---------------------------------------  '
+            DISPLAY ' '
+            ACCEPT choix
+        END-PERFORM
+        EVALUATE choix
+
+            WHEN 1 PERFORM RECHERCHE_EQUIPE_VAISSEAU
+            WHEN 2 PERFORM RECHERCHE_EQUIPE_LIEU
+            WHEN 2 PERFORM RECHERCHE_EQUIPE_MISSION
+            WHEN 2 PERFORM RECHERCHE_EQUIPE_VOISINS .
+
+
+
+
+RECHERCHE_EQUIPE_LIEU.
+
+    OPEN INPUT Fequipes
+    OPEN INPUT Fmissions
+
+    PERFORM WITH TEST AFTER UNTIL feq_idEquipe > 0
+        DISPLAY "identifiant equipe"
+        ACCEPT feq_idEquipe
+     END-PERFORM
+
+     READ Fequipes , KEY IS  feq_idEquipe
+        INVALID KEY
+            DISPLAY "equipe existe pas"
+        NOT INVALID KEY
+            MOVE feq_idMission TO fmis_idMission
+            READ Fmissions , KEY IS fmis_idMission
+                INVALID KEY
+                    DISPLAY "erreur"
+                NOT INVALID KEY
+                    DISPLAY "le lieu ou se trouve l'equipe "fmis_nomLieu
+            END-READ
+     END-READ
+
+
+
+     CLOSE Fequipes
+     CLOSE Fmissions.
+
+
+RECHERCHE_EQUIPE_MISSION.
+
+    OPEN INPUT Fequipes
+    OPEN INPUT Fmissions
+
+     PERFORM WITH TEST AFTER UNTIL feq_idEquipe > 0
+        DISPLAY "identifiant equipe"
+        ACCEPT feq_idEquipe
+     END-PERFORM
+
+    READ Fequipes , KEY IS feq_idEquipe
+        INVALID KEY
+            DISPLAY "equipe existe pas"
+        NOT INVALID KEY
+            MOVE feq_idMission TO fmis_idMission
+            READ Fmissions KEY IS fmis_idMission
+                INVALID KEY
+                    DISPLAY "erreur"
+                NOT INVALID KEY
+                    DISPLAY "id mission" fmis_idMission
+            END-READ
+
+    END-READ
+    CLOSE Fmissions
+    CLOSE Fequipes.
 *>*******************FONCTION ANNEXE*********************************************
 
 VERIF_HOMONYME.
@@ -483,5 +727,14 @@ VERIF_HOMONYME.
     END-START.
 
 
+VERIF_MISSION.
+
+     MOVE feq_idMission TO fmis_idMission
+     READ Fmissions KEY IS fmis_idMission
+                INVALID KEY
+                    DISPLAY "la mission n'existe pas"
+                NOT INVALID KEY
+                   MOVE 1 TO Wtrouve
+           END-READ.
 
 END PROGRAM YOUR-PROGRAM-NAME.
