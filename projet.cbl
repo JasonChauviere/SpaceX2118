@@ -131,6 +131,7 @@ WORKING-STORAGE SECTION.
      77 Wok PIC 9.
      77 Wfin PIC 9.
      77 Wtrouve PIC 9.
+     77 Wcontinuer PIC 9.
 
 
      77 Wpays  PIC A(30).
@@ -138,6 +139,8 @@ WORKING-STORAGE SECTION.
      77 Wprenom PIC A(30).
      77 Wrole PIC X(30).
      77 Wequipe PIC 9(5).
+
+
 
 PROCEDURE DIVISION.
 
@@ -202,8 +205,9 @@ PROCEDURE DIVISION.
         DISPLAY ' Afficher les membres d une equipe : 8'
         DISPLAY ' Recherche equipe                  : 9'
         DISPLAY '  ---------------------------------------  '
-        DISPLAY ' Ajouter une course : 6                    '
-        DISPLAY ' Rechercher une course (ville + type) : 7  '
+        DISPLAY '       COMPOSITION EQUIPE                   '
+        DISPLAY ' Faire une composition equipe       :10 '
+        DISPLAY ' Modifier composition               :11 '
         DISPLAY ' '
         ACCEPT choix
         EVALUATE choix
@@ -217,6 +221,8 @@ PROCEDURE DIVISION.
         WHEN 7 PERFORM MODIFIER_EQUIPE
         WHEN 8 PERFORM AFFICHER_MEMBRE_EQUIPE
         WHEN 9 PERFORM RECHERCHE_EQUIPE
+
+        WHEN 10 PERFORM FAIRE_COMPO
 
 
 
@@ -643,7 +649,8 @@ RECHERCHE_EQUIPE.
             WHEN 2 PERFORM RECHERCHE_EQUIPE_VOISINS .
 
 
-
+RECHERCHE_EQUIPE_VAISSEAU.
+RECHERCHE_EQUIPE_VOISINS .
 
 RECHERCHE_EQUIPE_LIEU.
 
@@ -699,6 +706,51 @@ RECHERCHE_EQUIPE_MISSION.
     END-READ
     CLOSE Fmissions
     CLOSE Fequipes.
+
+*>*******************FICHIER COMPOSITION EQUIPE*********************************************
+FAIRE_COMPO.
+
+    MOVE 0 TO Wok
+    MOVE 0 TO Wfin
+    OPEN I-O Fcompo_equipes
+    OPEN INPUT Fequipes
+
+
+    PERFORM WITH TEST AFTER UNTIL feq_idEquipe > 0
+        DISPLAY "identifiant equipe"
+        ACCEPT feq_idEquipe
+     END-PERFORM
+
+     READ Fequipes , KEY IS feq_idEquipe
+        INVALID KEY
+            DISPLAY "equipe existe pas"
+        NOT INVALID KEY
+            MOVE 1 TO Wok
+     END-READ
+
+
+     IF Wok = 1 THEN
+        PERFORM WITH TEST AFTER UNTIL  Wcontinuer = 0
+            DISPLAY "l'astronaute a ajouter"
+            ACCEPT fast_idAstronaute
+            READ Fastronautes KEY IS fast_idAstronaute
+                INVALID KEY
+                    DISPLAY "erreur"
+                NOT INVALID KEY
+
+
+            PERFORM WITH TEST AFTER UNTIL Wcontinuer = 1 OR Wcontinuer =0
+                DISPLAY "voulez vous continuer 1 | 0"
+                ACCEPT Wcontinuer
+            END-PERFORM
+
+        END-PERFORM
+     END-IF
+
+
+    CLOSE Fequipes
+    CLOSE Fcompo_equipes.
+
 *>*******************FONCTION ANNEXE*********************************************
 
 VERIF_HOMONYME.
