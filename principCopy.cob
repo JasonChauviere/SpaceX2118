@@ -7,7 +7,7 @@ SELECT Fastronautes ASSIGN TO "astronautes.dat"
         ORGANIZATION indexed
         ACCESS IS dynamic
         FILE STATUS IS fa_stat
-        RECORD KEY fa_idAstro
+        RECORD KEY fa_idAstronaute
         ALTERNATE RECORD KEY fa_pays WITH DUPLICATES
         ALTERNATE RECORD KEY fa_role WITH DUPLICATES
         ALTERNATE RECORD KEY fa_idEquipe WITH DUPLICATES.
@@ -76,20 +76,40 @@ WORKING-STORAGE SECTION.
         77 fm_stat PIC 9(2).
         77 fl_stat PIC 9(2).
         77 fv_stat PIC 9(2).
+        77 Wfv_nomVaisseau PIC X(30).
+        77 Wfv_typeVaisseau PIC X(30).
+        77 Wfv_nomLieu PIC X(30).
+        77 Wfv_newCapacite PIC 9(3).
+        77 Wfv_capaciteMax PIC 9(3).
+        77 Wfm_nomLieu PIC X(30).
+        77 Wfm_description PIC X(30).
+        77 Wfm_idMax PIC 9(9).
+        77 compteurEquipe PIC 9(3).
+        77 shipSize PIC 9(3).
+        77 Wfe_idEquipe PIC 9(4).
+        77 fin PIC 9.
+        77 Wopt PIC 9.
+        77 Wverif_a PIC 9.
+        77 Wverif_a2 PIC 9.
+        
+        
+        
+        
+        
 PROCEDURE DIVISION.
         OPEN I-O Fastronautes
-        IF fast_stat=35 THEN
+        IF fa_stat=35 THEN
                 OPEN OUTPUT Fastronautes
         END-IF
         CLOSE Fastronautes
         OPEN I-O Fequipes
-        IF feq_stat=35 THEN
+        IF fe_stat=35 THEN
                 OPEN OUTPUT Fequipes
         END-IF
         CLOSE Fequipes
        
         OPEN I-O Fmissions
-        IF fmis_stat=35 THEN
+        IF fm_stat=35 THEN
                 OPEN OUTPUT Fmissions
         END-IF
         CLOSE Fmissions
@@ -99,8 +119,10 @@ PROCEDURE DIVISION.
         END-IF
         CLOSE Fvaisseaux
         OPEN EXTEND Flieux
-        IF fli_stat=35 THEN
+        IF fl_stat=35 THEN
                 OPEN OUTPUT Flieux
         END-IF
         CLOSE Flieux
 STOP RUN.
+
+
