@@ -89,25 +89,25 @@ WORKING-STORAGE SECTION.
         77 fa_stat PIC 9(2).
         77 fe_stat PIC 9(2).
         77 fm_stat PIC 9(2).
-        77 fl_stat PIC 9(2).
         77 fv_stat PIC 9(2).
+        77 fl_stat PIC 9(2).
 
 PROCEDURE DIVISION.
 
         OPEN I-O Fastronautes
-        IF fast_stat=35 THEN
+        IF fa_stat=35 THEN
                 OPEN OUTPUT Fastronautes
         END-IF
         CLOSE Fastronautes
 
         OPEN I-O Fequipes
-        IF feq_stat=35 THEN
+        IF fe_stat=35 THEN
                 OPEN OUTPUT Fequipes
         END-IF
         CLOSE Fequipes
        
         OPEN I-O Fmissions
-        IF fmis_stat=35 THEN
+        IF fm_stat=35 THEN
                 OPEN OUTPUT Fmissions
         END-IF
         CLOSE Fmissions
@@ -119,9 +119,11 @@ PROCEDURE DIVISION.
         CLOSE Fvaisseaux
 
         OPEN EXTEND Flieux
-        IF fli_stat=35 THEN
+        IF fl_stat=35 THEN
                 OPEN OUTPUT Flieux
         END-IF
         CLOSE Flieux
 
 STOP RUN.
+
+COPY astronautes.cob
