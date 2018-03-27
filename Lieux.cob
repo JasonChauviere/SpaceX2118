@@ -1,84 +1,268 @@
-*> FICHIER LIEU
-AJOUTER_LIEU.
+       AJOUT_EQUIPE.
+               OPEN I-O Fequipes
 
-    OPEN I-O Flieux
+               DISPLAY "id equipe"
+               PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                   ACCEPT fe_idEquipe
+               END-PERFORM
 
-    DISPLAY "donnez le nom du lieu"
-    ACCEPT fl_nomLieu
+               READ Fequipes  KEY IS fe_idEquipe
+                   INVALID KEY
+                        DISPLAY "description equipe"
+                        ACCEPT fe_description
+                        MOVE 0 TO fe_nbAstronautes
+                        MOVE 0 TO fe_idMission
+                        WRITE eTampon
+                           INVALID KEY
+                                DISPLAY "erreur"
+                          NOT INVALID KEY
+                                DISPLAY "ajout reussi"
+                            END-WRITE
+                    NOT INVALID KEY
+                    DISPLAY "identifiant existant"
+               END-READ
+               CLOSE Fequipes.
 
-    READ flieux  KEY IS fl_nomLieu
-        INVALID KEY
-            DISPLAY "donnez type lieu"
-            ACCEPT fl_typeLieu
 
-            DISPLAY "Habitable 1 "
-            DISPLAY "Pas habitable 2 "
-            PERFORM WITH TEST AFTER UNTIL fl_habitable = 1 OR fl_habitable = 0
-                ACCEPT fl_habitable
-            END-PERFORM
+               MODIFIER_EQUIPE.
 
-            WRITE lTampon
+               OPEN I-O Fequipes
+
+               DISPLAY "id equipe"
+               PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                   ACCEPT fe_idEquipe
+               END-PERFORM
+
+               READ Fequipes , KEY IS  fe_idEquipe
                 INVALID KEY
-                    DISPLAY "erreur"
+                    DISPLAY "equipe existe pas"
                 NOT INVALID KEY
-                    DISPLAY "ajout effectuer"
-            END-WRITE
-        NOT INVALID KEY
-            DISPLAY "lieu existe deja"
-    END-READ
+                        DISPLAY 'description '
+                        ACCEPT fe_description
+                        REWRITE eTampon
+                            INVALID KEY
+                                DISPLAY "erreur"
+                            NOT INVALID KEY
+                                DISPLAY "modification efefctue"
+                        END-REWRITE
+               END-READ
 
-    CLOSE Flieux.
+               CLOSE Fequipes.
 
-MODIFIER_LIEU.
+               SUPPRIMER_EQUIPE.
 
-    OPEN I-O Flieux
+               OPEN I-O Fequipes
 
-    DISPLAY "donnez le nom du lieu"
-    ACCEPT fl_nomLieu
+               DISPLAY "id equipe"
+               PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                   ACCEPT fe_idEquipe
+               END-PERFORM
 
-    READ flieux  KEY IS fl_nomLieu
-        INVALID KEY
-            DISPLAY "lieu existe pas"
-        NOT INVALID KEY
-            DISPLAY "donnez type lieu"
-            ACCEPT fl_typeLieu
+               READ Fequipes  KEY IS fe_idEquipe
+                   INVALID KEY
+                       DISPLAY "identifiant existe pas"
+                   NOT INVALID KEY
+                       DELETE Fequipes  RECORD
+               END-READ
 
-            DISPLAY "Habitable 1 "
-            DISPLAY "Pas habitable 2 "
-            PERFORM WITH TEST AFTER UNTIL fl_habitable = 1 OR fl_habitable = 0
-                ACCEPT fl_habitable
+               CLOSE Fequipes.
+
+
+               AFFICHER_MEMBRE_EQUIPE.
+
+            MOVE 0 TO Wfin
+            OPEN INPUT Fequipes
+            OPEN INPUT Fastronautes
+
+
+            DISPLAY "id equipe"
+            PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                ACCEPT fe_idEquipe
             END-PERFORM
 
-            REWRITE lTampon END-REWRITE
-    END-READ
+            READ Fequipes  KEY IS fe_idEquipe
+                INVALID KEY
+                     DISPLAY "identifiant existe pas"
+                NOT INVALID KEY
+                    MOVE fe_idEquipe  TO fa_idEquipe
+                    START Fastronautes , KEY IS = fa_idEquipe
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            PERFORM WITH TEST AFTER UNTIL Wfin = 1
+                               OR fa_idEquipe <> fe_idEquipe
+                                READ Fastronautes
+                                    AT END
+                                        MOVE 1 TO WFin
+                                    NOT AT END
+                                        DISPLAY "nom " fa_nom
+                                        DISPLAY "prenom " fa_prenom
+                                        DISPLAY "role " fa_role
+                                        DISPLAY "pays " fa_pays
+                                END-READ
+                            END-PERFORM
+                    END-START
 
-    CLOSE Flieux.
+            END-READ
 
-*> FICHIER STATS
+            CLOSE Fequipes
+            CLOSE Fastronautes.
 
-ASTRO_CHOMEUR.
 
-    MOVE 0 TO Wfin
-    OPEN INPUT Fastronautes
+           RECHERCHE_VAISSEAU_EQUIPE.
 
-    PERFORM WITH TEST AFTER UNTIL  Wfin = 1
-        READ Fastronautes
-            AT END
-                MOVE 1 TO Wfin
-            NOT AT END
-                IF fa_idEquipe = 0 THEN
-                    DISPLAY "astronaute " fa_idAstronaute
-                    DISPLAY "nom " fa_nom
-                    DISPLAY "prenom " fa_prenom
-                    DISPLAY "role " fa_role
-                    DISPLAY "pays " fa_pays
-                END-IF
-        END-READ
-    END-PERFORM
-    CLOSE Fastronautes.
+            MOVE  0 TO Wfin
+            MOVE ' ' TO WnomVaisseau
 
-ROLE_STATS.
+            OPEN INPUT Fequipes
+            OPEN INPUT Fmissions
+            OPEN INPUT Fvaisseaux
 
-    OPEN INPUT Fastronautes
-    CLOSE Fastronautes.
-STOP RUN.
+            DISPLAY "id equipe"
+            PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                ACCEPT fe_idEquipe
+            END-PERFORM
+
+
+            READ Fequipes  KEY IS fe_idEquipe
+                INVALID KEY
+                     DISPLAY "identifiant existe pas"
+                NOT INVALID KEY
+                    MOVE fe_nbAstronautes TO WnbEquipe
+                    MOVE fe_idMission TO fm_idMission
+                    READ Fmissions , KEY IS fm_idMission
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            MOVE fm_nomLieu TO fv_nomLieu
+                            START Fvaisseaux  KEY IS = fv_nomLieu
+                                INVALID KEY
+                                    DISPLAY "erreur"
+                                NOT INVALID KEY
+                                    PERFORM WITH TEST AFTER UNTIL Wfin = 1
+                                       OR fv_nomLieu <> fm_nomLieu
+                                        READ Fvaisseaux
+                                            AT END
+                                                MOVE 1 TO Wfin
+                                            NOT AT END
+                                                IF WnbEquipe < fv_capacite THEN
+                                                    MOVE fv_capacite
+                                                       TO WnbEquipe
+                                                    MOVE fv_nomVaisseau
+                                                       TO WnomVaisseau
+                                                END-IF
+                                        END-READ
+                                    END-PERFORM
+
+                                END-START
+                    END-READ
+            END-READ
+
+            DISPLAY "le vaisseau " fv_nomVaisseau
+
+            CLOSE Fequipes
+            CLOSE Fmissions
+            CLOSE Fvaisseaux.
+
+            RECHERCHE_LIEU_EQUIPE.
+
+            OPEN INPUT Fequipes
+            OPEN INPUT Fmissions
+
+            DISPLAY "id equipe"
+            PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                ACCEPT fe_idEquipe
+            END-PERFORM
+
+            READ Fequipes  KEY IS fe_idEquipe
+                INVALID KEY
+                     DISPLAY "identifiant existe pas"
+                NOT INVALID KEY
+                    MOVE fe_idMission TO fm_idMission
+                    READ Fmissions
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            DISPLAY "le lieu de la mission  : "
+                               fm_nomLieu
+                    END-READ
+            END-READ
+
+            CLOSE Fequipes
+            close Fmissions.
+
+
+           RECHERCHE_MISSION_EQUIPE.
+
+            OPEN INPUT Fequipes
+            OPEN INPUT Fmissions
+
+            DISPLAY "id equipe"
+            PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                ACCEPT fe_idEquipe
+            END-PERFORM
+
+            READ Fequipes  KEY IS fe_idEquipe
+                INVALID KEY
+                     DISPLAY "identifiant existe pas"
+                NOT INVALID KEY
+                    MOVE fe_idMission TO fm_idMission
+                    READ Fmissions  , KEY IS fm_idMission
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            DISPLAY "identidiant mission " fm_idMission
+                    END-READ
+            END-READ
+
+            CLOSE Fequipes
+            CLOSE Fmissions.
+
+
+        RECHERCHE_VOISIN_EQUIPE.
+
+            OPEN INPUT Fequipes
+            OPEN INPUT Fmissions
+
+            DISPLAY "id equipe"
+            PERFORM WITH TEST AFTER UNTIL fe_idEquipe > 0
+                ACCEPT fe_idEquipe
+            END-PERFORM
+
+            READ Fequipes  KEY IS fe_idEquipe
+                INVALID KEY
+                     DISPLAY "identifiant existe pas"
+                NOT INVALID KEY
+                    MOVE fe_idMission TO fm_idMission
+                    READ Fmissions  , KEY IS fm_idMission
+                        INVALID KEY
+                            DISPLAY "erreur"
+                        NOT INVALID KEY
+                            MOVE fm_nomLieu TO WnomLieu
+                    END-READ
+            END-READ
+
+            CLOSE Fequipes
+
+            OPEN INPUT Fequipes
+            PERFORM WITH TEST AFTER UNTIL Wfin = 1
+                READ Fequipes
+                    AT END
+                        MOVE 1 TO Wfin
+                    NOT AT END
+                        MOVE fe_idMission TO fm_idMission
+                        READ Fmissions , KEY IS  fm_idMission
+                            INVALID KEY
+                                DISPLAY "erreur"
+                            NOT INVALID KEY
+                                IF fm_nomLieu = WnomLieu THEN
+                                    DISPLAY "identidiant : "
+                                           fm_idMission
+                                    DISPLAY "description : "
+                                           fm_description
+                                END-IF
+                        END-READ
+                END-READ
+            END-PERFORM
+            CLOSE Fequipes
+            CLOSE Fmissions.
